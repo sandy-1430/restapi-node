@@ -4,17 +4,7 @@ const mongoose = require('mongoose');
 const Student = require('../models/studentmodel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-var nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'sathishsandy8124@gmail.com',
-        pass: 'Sandy@1430'
-    }
-});
-
-let forget_code;
 
 router.get('/', (req, res, next) => {
     res.status(200).json({
@@ -179,103 +169,44 @@ router.put('/login', (req, res) => {
 
 router.post('/forget-password', (req, res) => {
     console.log(req.body.email);
-    const getstudent = Student.findOne({ email: req.body.email });
-    forget_code = Math.floor(100000 + Math.random() * 900000);
-    if (getstudent) {
-        var mailOptions = {
-            from: 'sathishsandy8124@gmail.com',
-            to: req.body.email,
-            subject: 'Sending Email using Node.js',
-            text: 'That was easy!'
-        };
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Email sent: ' + info.response);
+    Student.find({ email: req.body.email })
+        .exec()
+        .then((student) => {
+            if (student.length > 0) {
+                bcrypt.hash(req.body.password, 10, (err, hash) => {
+                    if (err) {
+                        return res.status(500).json({
+                            error: err
+                        })
+                    }
+                    else {
+                        Student.findOneAndUpdate({ email: req.body.email }, {
+                            $set: {
+                                password: hash,
+                            }
+                        })
+                            .then(result => {
+                                console.log(result);
+                                if (result) {
+                                    res.status(200).json({
+                                        msg: "Password Changed Successfully"
+                                    })
+                                }
+                            })
+                            .catch(err => {
+                                res.status(500).json({
+                                    error: err
+                                })
+                            })
+                    }
+                })
             }
-        });
-    }
-
-    // Student.find({ email: req.body.email })
-    //     .exec()
-    //     .then((student) => {
-    //         if (student.length > 0) {
-    //             bcrypt.hash(req.body.password, 10, (err, hash) => {
-    //                 if (err) {
-    //                     return res.status(500).json({
-    //                         error: err
-    //                     })
-    //                 }
-    //                 else {
-    //                     Student.findOneAndUpdate({ email: req.body.email }, {
-    //                         $set: {
-    //                             password: hash,
-    //                         }
-    //                     })
-    //                         .then(result => {
-    //                             console.log(result);
-    //                             if (result) {
-    //                                 res.status(200).json({
-    //                                     msg: "Password Changed Successfully"
-    //                                 })
-    //                             }
-    //                         })
-    //                         .catch(err => {
-    //                             res.status(500).json({
-    //                                 error: err
-    //                             })
-    //                         })
-    //                 }
-    //             })
-    //         }
-    //         else {
-    //             res.status(500).json({
-    //                 msg: "This Email is not exists"
-    //             })
-    //         }
-    //     })
-})
-router.post('/forget', (req, res) => {
-    var transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // upgrade later with STARTTLS
-        requireTLS: true,
-        auth: {
-            user: "sathishsandy8124@gmail.com",
-            pass: "Sandy@1430",
-        },
-    });
-
-    transporter.verify(function (error, success) {
-        if (error) {
-            console.log(error);
-            res.status(500).json({
-                err: error
-            })
-        } else {
-            console.log("Server is ready to take our messages");
-        }
-    });
-
-    // var mailOptions = {
-    //     from: 'sathishsandy8124@gmail.com',
-    //     to: req.body.email,
-    //     subject: 'Sending Email using Node.js',
-    //     text: 'That was easy!'
-    // };
-
-    // transporter.sendMail(mailOptions, function (error, info) {
-    //     if (error) {
-    //         console.log(error);
-    //         res.status(500).json({
-    //             err: error
-    //         })
-    //     } else {
-    //         console.log('Email sent: ' + info.response);
-    //     }
-    // });
+            else {
+                res.status(500).json({
+                    msg: "This Email is not exists"
+                })
+            }
+        })
 })
 
 
