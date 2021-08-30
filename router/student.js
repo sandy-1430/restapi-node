@@ -213,9 +213,8 @@ router.post('/forget-password', (req, res) => {
 router.get('/forget', (req, res) => {
     var transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // upgrade later with STARTTLS
-        requireTLS: true,
+        port: 485,
+        secure: true, // upgrade later with STARTTLS
         auth: {
             user: "sathishsandy8124@gmail.com",
             pass: "Sandy@1430",
