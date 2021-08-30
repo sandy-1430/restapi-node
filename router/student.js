@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -6,7 +5,7 @@ const Student = require('../models/studentmodel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 var nodemailer = require('nodemailer');
-const auth = require("../middleware/auth");
+
 
 router.get('/', (req, res, next) => {
     res.status(200).json({
@@ -76,85 +75,52 @@ router.post('/signup', (req, res, next) => {
 
 });
 
-router.post('/login', async (req, res) => {
-    try {
-        const student = await Student.findOne({ email: req.body.email });
-        if (student && (await bcrypt.compare(req.body.password, student.password))) {
-            // Create token
-            console.log(student._id);
-            const token = jwt.sign({
-                _id: student._id,
-                username: student.username,
-                email: student.email,
-                phone: student.phone,
-                gender: student.gender,
-                rollno: student.rollno,
-                course: student.course,
-                address: student.address,
-                fathername: student.fathername,
-                mothername: student.mothername
-            },
-                'this is dummy text',
-                {
-                    expiresIn: "2h",
-                }
-            );
-            student.token = token;
-            return res.status(200).json({
-                token: token
-            });
-        }
-        res.status(400).send("Invalid Credentials");
-    } catch (err) {
-        console.log(err);
-    }
-
-
-    // Student.find({ email: req.body.email })
-    //     .exec()
-    //     .then(student => {
-    //         if (student.length < 1) {
-    //             return res.status(401).json({
-    //                 msg: 'user not exist'
-    //             })
-    //         }
-    //         else {
-    //             bcrypt.compare(req.body.password, student[0].password, (err, result) => {
-    //                 if (!result) {
-    //                     return res.status(500).json({
-    //                         msg: "password not match"
-    //                     })
-    //                 }
-    //                 if (result) {
-    //                     const token = jwt.sign({
-    //                         _id: student[0]._id,
-    //                         username: student[0].username,
-    //                         email: student[0].email,
-    //                         phone: student[0].phone,
-    //                         gender: student[0].gender,
-    //                         rollno: student[0].rollno,
-    //                         course: student[0].course,
-    //                         address: student[0].address,
-    //                         fathername: student[0].fathername,
-    //                         mothername: student[0].mothername
-    //                     },
-    //                         process.env.TOKEN_KEY,
-    //                         {
-    //                             expiresIn: 60 * 1
-    //                         }
-    //                     );
-    //                     res.status(200).json({
-    //                         token: token
-    //                     })
-    //                 }
-    //             })
-    //         }
-    //     })
-    //     .catch(err => {
-    //         res.status(500).json({
-    //             error: err
-    //         })
-    //     })
+router.post('/login', (req, res) => {
+    Student.find({ email: req.body.email })
+        .exec()
+        .then(student => {
+            if (student.length < 1) {
+                return res.status(401).json({
+                    msg: 'user not exist'
+                })
+            }
+            else {
+                bcrypt.compare(req.body.password, student[0].password, (err, result) => {
+                    if (!result) {
+                        return res.status(500).json({
+                            msg: "password not match"
+                        })
+                    }
+                    if (result) {
+                        const token = jwt.sign({
+                            _id: student[0]._id,
+                            username: student[0].username,
+                            email: student[0].email,
+                            phone: student[0].phone,
+                            gender: student[0].gender,
+                            rollno: student[0].rollno,
+                            course: student[0].course,
+                            address: student[0].address,
+                            fathername: student[0].fathername,
+                            mothername: student[0].mothername
+                        },
+                            'this is dummy text',
+                            {
+                                expiresIn: 60 * 1
+                            }
+                        );
+                        res.status(200).json({
+                            token: token
+                        })
+                    }
+                })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
 })
 
 router.put('/login', (req, res) => {
@@ -202,10 +168,6 @@ router.put('/login', (req, res) => {
         })
 })
 
-router.get("/welcome", auth, (req, res) => {
-    res.status(200).send("Welcome 🙌 ");
-})
-
 router.post('/forget-password', (req, res) => {
     console.log(req.body.email);
     Student.find({ email: req.body.email })
@@ -248,7 +210,7 @@ router.post('/forget-password', (req, res) => {
         })
 })
 
-router.post('/forget', (req, res) => {
+router.get('/forget', (req, res) => {
     var transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -270,28 +232,6 @@ router.post('/forget', (req, res) => {
             console.log("Server is ready to take our messages");
         }
     });
-
-    // var mailOptions = {
-    //     from: 'sathishsandy8124@gmail.com',
-    //     to: req.body.email,
-    //     subject: 'Sending Email using Node.js',
-    //     text: 'That was easy!'
-    // };
-
-    // transporter.sendMail(mailOptions, function (error, info) {
-    //     if (error) {
-    //         console.log(error);
-    //         res.status(500).json({
-    //             err: error
-    //         })
-    //     } else {
-    //         console.log('Email sent: ' + info.response);
-    //     }
-    // });
 })
 
-
-
 module.exports = router;
-
-
