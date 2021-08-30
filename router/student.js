@@ -80,12 +80,6 @@ router.post('/login', cors(), (req, res) => {
     Student.find({ email: req.body.email })
         .exec()
         .then(student => {
-            if (student.length < 1) {
-                return res.status(401).json({
-                    msg: 'user not exist'
-                })
-            }
-            else {
                 bcrypt.compare(req.body.password, student[0].password, (err, result) => {
                     if (!result) {
                         return res.status(500).json({
@@ -115,7 +109,6 @@ router.post('/login', cors(), (req, res) => {
                         })
                     }
                 })
-            }
         })
         .catch(err => {
             res.status(500).json({
