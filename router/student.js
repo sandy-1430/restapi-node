@@ -5,6 +5,7 @@ const Student = require('../models/studentmodel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 var nodemailer = require('nodemailer');
+var cors = require('cors');
 
 
 router.get('/', (req, res, next) => {
@@ -75,7 +76,7 @@ router.post('/signup', (req, res, next) => {
 
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', cors(), (req, res) => {
     Student.find({ email: req.body.email })
         .exec()
         .then(student => {
@@ -123,7 +124,7 @@ router.post('/login', (req, res) => {
         })
 })
 
-router.put('/login', (req, res) => {
+router.put('/login', cors(), (req, res) => {
     console.log(req.body.email);
     Student.findOneAndUpdate({ _id: req.body._id }, {
         $set: {
@@ -210,11 +211,12 @@ router.post('/forget-password', (req, res) => {
         })
 })
 
-router.get('/forget', (req, res) => {
+router.post('/forget', (req, res) => {
     var transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
-        port: 485,
-        secure: true, // upgrade later with STARTTLS
+        port: 587,
+        secure: false, // upgrade later with STARTTLS
+        requireTLS: true,
         auth: {
             user: "sathishsandy8124@gmail.com",
             pass: "Sandy@1430",
@@ -231,6 +233,28 @@ router.get('/forget', (req, res) => {
             console.log("Server is ready to take our messages");
         }
     });
+
+    // var mailOptions = {
+    //     from: 'sathishsandy8124@gmail.com',
+    //     to: req.body.email,
+    //     subject: 'Sending Email using Node.js',
+    //     text: 'That was easy!'
+    // };
+
+    // transporter.sendMail(mailOptions, function (error, info) {
+    //     if (error) {
+    //         console.log(error);
+    //         res.status(500).json({
+    //             err: error
+    //         })
+    //     } else {
+    //         console.log('Email sent: ' + info.response);
+    //     }
+    // });
 })
 
+
+
 module.exports = router;
+
+
