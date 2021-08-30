@@ -212,18 +212,16 @@ router.post('/forget-password', (req, res) => {
 })
 
 router.get('/forget', (req, res) => {
-    
     var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'sathishsandy8124@gmail.com',
-        pass: 'Sandy@1430'
-      }
+        service: 'gmail',
+        auth: {
+            user: 'sathishsandy8124@gmail.com',
+            pass: 'Sandy@1430'
+        }
     });
-    
     var mailOptions = {
         from: 'sathishsandy8124@gmail.com',
-        to: 'sandysathish8124@gmail.com,
+        to: 'sandysathish8124@gmail.com',
         subject: 'Sending Email using Node.js',
         text: 'That was easy!'
     };
@@ -243,5 +241,3 @@ router.get('/forget', (req, res) => {
 
 
 module.exports = router;
-
-
