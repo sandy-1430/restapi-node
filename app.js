@@ -19,7 +19,14 @@ app.use(bodyParser.json());
 const userRouter = require('./router/user');
 const studentRouter = require('./router/student');
 
-
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
+});
 app.use('/user', userRouter);
 app.use('/student', studentRouter);
 
