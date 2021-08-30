@@ -211,7 +211,7 @@ router.post('/forget-password', (req, res) => {
         })
 })
 
-router.post('/forget', (req, res) => {
+router.get('/forget', (req, res) => {
     var transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -233,24 +233,6 @@ router.post('/forget', (req, res) => {
             console.log("Server is ready to take our messages");
         }
     });
-
-    // var mailOptions = {
-    //     from: 'sathishsandy8124@gmail.com',
-    //     to: req.body.email,
-    //     subject: 'Sending Email using Node.js',
-    //     text: 'That was easy!'
-    // };
-
-    // transporter.sendMail(mailOptions, function (error, info) {
-    //     if (error) {
-    //         console.log(error);
-    //         res.status(500).json({
-    //             err: error
-    //         })
-    //     } else {
-    //         console.log('Email sent: ' + info.response);
-    //     }
-    // });
 })
 
 
