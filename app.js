@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+var cors = require('cors');
 
 
 // app.use((req, res, next) => {
@@ -27,6 +28,8 @@ app.use(function (req, res, next) {
     );
     next();
 });
+
+app.use(cors());
 app.use('/user', userRouter);
 app.use('/student', studentRouter);
 
