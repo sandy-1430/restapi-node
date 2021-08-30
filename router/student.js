@@ -80,6 +80,12 @@ router.post('/login', cors(), (req, res) => {
     Student.find({ email: req.body.email })
         .exec()
         .then(student => {
+            if (student.length < 1) {
+                return res.status(500).json({
+                    msg: 'user not exist'
+                })
+            }
+            else {
                 bcrypt.compare(req.body.password, student[0].password, (err, result) => {
                     if (!result) {
                         return res.status(500).json({
@@ -109,6 +115,7 @@ router.post('/login', cors(), (req, res) => {
                         })
                     }
                 })
+            }
         })
         .catch(err => {
             res.status(500).json({
@@ -205,25 +212,30 @@ router.post('/forget-password', (req, res) => {
 })
 
 router.get('/forget', (req, res) => {
+    
     var transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // upgrade later with STARTTLS
-        requireTLS: true,
-        auth: {
-            user: "sathishsandy8124@gmail.com",
-            pass: "Sandy@1430",
-        },
+      service: 'gmail',
+      auth: {
+        user: 'sathishsandy8124@gmail.com',
+        pass: 'Sandy@1430'
+      }
     });
+    
+    var mailOptions = {
+        from: 'sathishsandy8124@gmail.com',
+        to: 'sandysathish8124@gmail.com,
+        subject: 'Sending Email using Node.js',
+        text: 'That was easy!'
+    };
 
-    transporter.verify(function (error, success) {
+    transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
             console.log(error);
             res.status(500).json({
                 err: error
             })
         } else {
-            console.log("Server is ready to take our messages");
+            console.log('Email sent: ' + info.response);
         }
     });
 })
