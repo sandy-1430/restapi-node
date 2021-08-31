@@ -12,7 +12,6 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/signup', (req, res, next) => {
-
     User.find({ email: req.body.email })
         .exec()
         .then((user) => {
@@ -66,47 +65,44 @@ router.post('/signup', (req, res, next) => {
 
             }
         })
-
 });
 
-router.post('/login', (req, res) => {
-    User.find({ email: req.body.email })
-        .exec()
-        .then(user => {
-            if (user.length < 1) {
-                return res.status(401).json({
-                    msg: 'user not exist'
+router.post('/login', async (req, res) => {
+    const find_user = await User.findOne({ $or: [{ email: req.body.email }, { phone: req.body.email }] });
+    if (find_user) {
+        bcrypt.compare(req.body.password, find_user.password, (err, result) => {
+            if (!result) {
+                return res.status(500).json({
+                    msg: "password not match"
                 })
             }
-            bcrypt.compare(req.body.password, user[0].password, (err, result) => {
-                if (!result) {
-                    return res.status(500).json({
-                        msg: "password not match"
-                    })
-                }
-                if (result) {
-                    const token = jwt.sign({
-                        _id: user[0]._id,
-                        username: user[0].username,
-                        email: user[0].email,
-                        phone: user[0].phone
-                    },
-                        'this is dummy text',
-                        {
-                            expiresIn: "24h"
-                        }
-                    );
-                    res.status(200).json({
-                        token: token
-                    })
-                }
-            })
+            if (result) {
+                const token = jwt.sign({
+                    _id: find_user._id,
+                    username: find_user.username,
+                    email: find_user.email,
+                    phone: find_user.phone
+                },
+                    'this is dummy text',
+                    {
+                        expiresIn: "24h"
+                    }
+                );
+                res.status(200).json({
+                    _id: find_user._id,
+                    username: find_user.username,
+                    email: find_user.email,
+                    phone: find_user.phone,
+                    token: token
+                })
+            }
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            })
+    }
+    else {
+        res.status(500).json({
+            msg: 'user not exist'
         })
+    }
 })
 
 router.put('/login', (req, res) => {
