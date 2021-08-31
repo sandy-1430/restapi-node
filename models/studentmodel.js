@@ -4,7 +4,7 @@ const StudentSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     username: String,
     email: String,
-    phone: Number,
+    phone: String,
     gender: String,
     rollno: String,
     course: String,
