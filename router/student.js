@@ -76,52 +76,44 @@ router.post('/signup', (req, res, next) => {
 
 });
 
-router.post('/login', cors(), (req, res) => {
-    Student.find({ email: req.body.email })
-        .exec()
-        .then(student => {
-            if (student.length < 1) {
+router.post('/login', cors(), async (req, res) => {
+    const student = await Student.findOne({ $or: [{ email: req.body.email }, { phone: req.body.email }] });
+    if (student) {
+        bcrypt.compare(req.body.password, student.password, (err, result) => {
+            if (!result) {
                 return res.status(500).json({
-                    msg: 'user not exist'
+                    msg: "password not match"
                 })
             }
-            else {
-                bcrypt.compare(req.body.password, student[0].password, (err, result) => {
-                    if (!result) {
-                        return res.status(500).json({
-                            msg: "password not match"
-                        })
+            if (result) {
+                const token = jwt.sign({
+                    _id: student._id,
+                    username: student.username,
+                    email: student.email,
+                    phone: student.phone,
+                    gender: student.gender,
+                    rollno: student.rollno,
+                    course: student.course,
+                    address: student.address,
+                    fathername: student.fathername,
+                    mothername: student.mothername
+                },
+                    'this is dummy text',
+                    {
+                        expiresIn: "24h"
                     }
-                    if (result) {
-                        const token = jwt.sign({
-                            _id: student[0]._id,
-                            username: student[0].username,
-                            email: student[0].email,
-                            phone: student[0].phone,
-                            gender: student[0].gender,
-                            rollno: student[0].rollno,
-                            course: student[0].course,
-                            address: student[0].address,
-                            fathername: student[0].fathername,
-                            mothername: student[0].mothername
-                        },
-                            'this is dummy text',
-                            {
-                                expiresIn: 60 * 1
-                            }
-                        );
-                        res.status(200).json({
-                            token: token
-                        })
-                    }
+                );
+                res.status(200).json({
+                    token: token
                 })
             }
         })
-        .catch(err => {
-            res.status(500).json({
-                error: err
-            })
+    }
+    else {
+        res.status(500).json({
+            msg: 'user not exist'
         })
+    }
 })
 
 router.put('/login', cors(), (req, res) => {
