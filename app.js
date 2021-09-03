@@ -30,7 +30,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use(cors({ credentials: true, origin: 'https://sandy-node-restapi.herokuapp.com/' }));
 app.use('/user', userRouter);
 app.use('/student', studentRouter);
 app.use('/result', studresultRouter);
