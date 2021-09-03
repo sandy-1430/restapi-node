@@ -5,7 +5,6 @@ const Student = require('../models/studentmodel');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 var nodemailer = require('nodemailer');
-var cors = require('cors');
 
 
 router.get('/', (req, res, next) => {
