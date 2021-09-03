@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 
 const userRouter = require('./router/user');
 const studentRouter = require('./router/student');
+const studresultRouter = require('./router/studentresult');
 
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -29,9 +30,10 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'https://sandy-node-restapi.herokuapp.com/' }));
 app.use('/user', userRouter);
 app.use('/student', studentRouter);
+app.use('/result', studresultRouter);
 
 
 module.exports = app;
