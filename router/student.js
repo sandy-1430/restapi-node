@@ -76,7 +76,7 @@ router.post('/signup', (req, res, next) => {
 
 });
 
-router.post('/login', cors(), async (req, res) => {
+router.post('/login', async (req, res) => {
     const student = await Student.findOne({ $or: [{ email: req.body.email }, { phone: req.body.email }] });
     if (student) {
         bcrypt.compare(req.body.password, student.password, (err, result) => {
@@ -116,7 +116,7 @@ router.post('/login', cors(), async (req, res) => {
     }
 })
 
-router.put('/login', cors(), (req, res) => {
+router.put('/login', (req, res) => {
     console.log(req.body.email);
     Student.findOneAndUpdate({ _id: req.body._id }, {
         $set: {
