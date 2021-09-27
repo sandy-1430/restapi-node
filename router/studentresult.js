@@ -2,7 +2,6 @@ const express = require('express');
 const student = express.Router();
 const mongoose = require('mongoose');
 const Result = require('../models/studresultmodel');
-var cors = require('cors');
 
 
 student.get('/', async (req, res, next) => {
@@ -195,6 +194,47 @@ student.post('/subject', async (req, res) => {
         })
     }
 
+})
+
+student.delete('/:sem/:rollno/:code', async (req, res) => {
+    const find_course = await Result.findOne({ "semester": req.params.sem });
+    if (find_course) {
+        const find_stud = find_course.students.filter((x) => x.rollno === req.params.rollno);
+        if (find_stud.length) {
+            const check_code = find_stud[0].result.filter((c) => c.code === req.params.code);
+            if (check_code.length) {
+                await Result.findOneAndUpdate({"semester": req.params.sem }, 
+                        { $pull: {"students.$[o].result": {"code": req.params.code} } },
+                        { arrayFilters: [{ 'o.rollno': req.params.rollno }] },
+                        (err, result) => {
+                            if (result) {
+                                console.log(result);
+                                return res.status(200).json({
+                                    result: result
+                                })
+                            } else {
+                                return res.status(500).json({
+                                    err: err
+                                })
+                            }
+                        });
+            } else {
+                show_err("Subject Code");
+            }
+        } else {
+            show_err("Roll No");
+        }
+    }
+    else {
+        show_err("semester");
+    }
+
+    function show_err(data) {
+        return res.status(500).json({
+            message: "Enter Valid " + data
+        })
+    }
+    
 })
 
 module.exports = student;
